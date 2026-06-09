@@ -1,8 +1,3 @@
-# Read Me First
-The following was discovered as part of building this project:
-
-* No Docker Compose services found. As of now, the application won't start! Please add at least one service to the `compose.yaml` file.
-
 # Getting Started
 
 ### Reference Documentation
@@ -24,13 +19,15 @@ The following guides illustrate how to use some features concretely:
 * [Building REST services with Spring](https://spring.io/guides/tutorials/rest/)
 * [Accessing Data with JPA](https://spring.io/guides/gs/accessing-data-jpa/)
 * [Validation](https://spring.io/guides/gs/validating-form-input/)
+* [Accessing data with MySQL](https://spring.io/guides/gs/accessing-data-mysql/)
 
 ### Docker Compose support
 This project contains a Docker Compose file named `compose.yaml`.
+In this file, the following services have been defined:
 
-However, no services were found. As of now, the application won't start!
+* mysql: [`mysql:latest`](https://hub.docker.com/_/mysql)
 
-Please make sure to add at least one service in the `compose.yaml` file.
+Please review the tags of the used images and set them to the same as you're running in production.
 
 ### Maven Parent overrides
 
