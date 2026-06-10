@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: tdl_postgres
+    environment:
+      POSTGRES_DB: tdl_db
+      POSTGRES_USER: tdl_user
+      POSTGRES_PASSWORD: tdl_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
