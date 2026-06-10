@@ -1,6 +1,7 @@
 package tdl.demo.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,7 +20,7 @@ public class Task {
     @GeneratedValue
     private Long id;
 
-    // Could add @NotBlank
+    @NotBlank
     // Eventually could make it so blank task cards are automatically deleted
     private String title;
 
@@ -32,5 +33,6 @@ public class Task {
     @Enumerated(EnumType.STRING)
     private Priority priority;
 
+    // Must be valid ()
     private LocalDateTime dueDate;
 }
