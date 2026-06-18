@@ -12,8 +12,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     // Spring derives the SQL from the below method names
 
-    // Search by title keyword
-    List<Task> findByTitleContainingIgnoreCase(String keyword);
+    // Search title and/or description for a keyword(s)
+    List<Task> findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String title, String description);
 
     // Search by status
     List<Task> findByStatus(Status status);

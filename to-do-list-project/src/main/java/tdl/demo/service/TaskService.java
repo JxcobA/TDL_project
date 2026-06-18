@@ -33,6 +33,13 @@ public class TaskService {
         return taskRepository.findByStatus(status);
     }
 
+    // Search task titles and/or descriptions for keyword
+    public List<Task> searchTasks(String keyword) {
+        return taskRepository.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword);
+    }
+    // This is a bit of a messy search, as the repo is essentially asking for the same keyword twice
+    // This is so that a search can be run in the title and desc.
+
 
     // NOTE: Individual update methods may be used for a button, whereas the all encompassing updateTask method is for full task updates
     // Mark task as complete:
