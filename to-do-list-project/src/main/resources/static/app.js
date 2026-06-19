@@ -47,7 +47,13 @@ async function loadTasks() {
 
     tasks.forEach(task => { // iterate over each task in the array
         const taskDiv = document.createElement('div'); // Create taskDiv element
-        taskDiv.textContent = `${task.title} - ${task.status} - ${task.priority}`; // set the title, status and priority of the taskDiv
+        taskDiv.innerHTML = `
+            <h3>${task.title}</h3>
+            <p>${task.description}</p>
+            <span>${task.status}</span>
+            <span>${task.priority}</span>
+            <button onclick="confirmDelete(${task.id})">Delete</button>
+        `;
         taskList.appendChild(taskDiv); // Append the taskDiv to the taskList
     });
 }
