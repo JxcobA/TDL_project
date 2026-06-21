@@ -1,0 +1,107 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f6fa;
+    margin: 0;
+    padding: 20px;
+}
+
+h1, h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#add-task-section,
+#search-section,
+#controls-section {
+    max-width: 800px;
+    margin: 0 auto 20px auto;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+#add-task-form input,
+#add-task-form textarea,
+#add-task-form select {
+    padding: 8px;
+    font-size: 14px;
+}
+
+#add-task-form textarea {
+    resize: vertical;
+}
+
+#add-task-form button,
+#search-section button,
+#controls-section button {
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+#task-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.task {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.task h3 {
+    margin: 0;
+    font-size: 18px;
+    word-break: break-word;
+}
+
+.task p {
+    margin: 0;
+    font-size: 14px;
+    color: #444;
+    word-break: break-word;
+}
+
+.task-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.task button {
+    padding: 8px;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #fff;
+}
+
+.btn-complete {
+    background: #4CAF50;
+}
+
+.btn-ongoing {
+    background: #2196F3;
+}
+
+.btn-suspend {
+    background: #FF9800;
+}
+
+.btn-delete {
+    background: #f44336;
+}
+
+.task button:hover {
+    opacity: 0.9;
+}

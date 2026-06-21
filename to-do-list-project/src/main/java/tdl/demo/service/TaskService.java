@@ -19,6 +19,7 @@ public class TaskService {
 
     // Create task:
     public Task createTask(Task task) {
+        task.setStatus(Status.ONGOING);
         return taskRepository.save(task); // .save() is a JpaRepository method
     }
 
