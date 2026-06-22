@@ -60,7 +60,7 @@ public class TaskController {
     }
 
     // Update task
-    @PutMapping("/{id}") // URL template variable, takes value from actual request
+    @PatchMapping("/{id}") // URL template variable, takes value from actual request
     public ResponseEntity<Task> updateTask(@PathVariable Long id, @RequestBody Task updated) {
         // No @Valid as I want to be able to perform partial updates
         // @PathVariable puts the id value from the URL into this param

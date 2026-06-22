@@ -16,8 +16,7 @@
     <h1>To-Do List</h1>
 </header>
 
-<!-- Add Task form -->
-<!-- A <form> groups related inputs together and is the standard way to collect structured user input -->
+
 <section id="add-task-section">
     <h2>Add Task</h2>
     <form id="add-task-form">
@@ -57,8 +56,11 @@
 
 <!-- Task list - populated dynamically by JS, not hardcoded here -->
 <section id="task-list-section">
-    <h2>Tasks</h2>
-    <div id="task-list"></div>
+    <h2 id="matches-heading" style="display:none;">Matching Tasks</h2>
+    <div id="task-list-matches"></div>
+
+    <h2 id="rest-heading" style="display:none;">Other Tasks</h2>
+    <div id="task-list-rest"></div>
 </section>
 
 <!-- JS -->
