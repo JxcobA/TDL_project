@@ -18,9 +18,13 @@
 
 
 <section id="add-task-section">
+    <div id="add-task-header" onclick="toggleAddTask()">
+        <span>Add Task</span>
+        <span id="add-task-arrow">▼</span>
+    </div>
     <form id="add-task-form" class="task">
         <div class="task-top-row">
-            <input type="text" id="title" placeholder="Title" required>
+            <input type="text" id="title" placeholder="Title">
             <select id="priority">
                 <option value="LOW">Low</option>
                 <option value="MEDIUM">Medium</option>
@@ -34,22 +38,29 @@
     </form>
 </section>
 
+<!--Search bar-->
+<input type="text" id="search-input" placeholder="Search tasks...">
+
 <!--Controls section containing search and filtering elements-->
-<section id="controls-section">
-    <input type="text" id="search-input" placeholder="Search tasks...">
-    <button id="search-button">Search</button>
-    <div id="filter-buttons">
-        <button data-status="ALL">All</button>
-        <button data-status="ONGOING">Pending</button>
-        <button data-status="COMPLETED">Completed</button>
-        <button data-status="SUSPENDED">Suspended</button>
-    </div>
-    <div id="sort-buttons">
-        <button data-sort="dueDate">Sort by Due Date</button>
-        <button data-sort="priority">Sort by Priority</button>
-        <button data-sort="status">Sort by Status</button>
-    </div>
-</section>
+    <section id="controls-section">
+        <div id="controls-header" onclick="toggleControls()">
+            <span>Controls</span>
+            <span id="controls-arrow">▼</span>
+        </div>
+        <div id="controls-body" class="collapsed">
+            <div class="control-group" id="filter-buttons">
+                <button data-status="ALL">All</button>
+                <button data-status="ONGOING">Pending</button>
+                <button data-status="COMPLETED">Completed</button>
+                <button data-status="SUSPENDED">Suspended</button>
+            </div>
+            <div class="control-group" id="sort-buttons">
+                <button data-sort="dueDate">Sort by Due Date</button>
+                <button data-sort="priority">Sort by Priority</button>
+                <button data-sort="status">Sort by Status</button>
+            </div>
+        </div>
+    </section>
 
 <!--Error message-->
 <p id="error-message" style="display:none; color:red;"></p>

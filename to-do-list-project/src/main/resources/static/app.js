@@ -5,7 +5,7 @@ const restList = document.getElementById('task-list-rest'); // Container for non
 const matchesHeading = document.getElementById('matches-heading'); // The heading shown above the search match list during a search
 const restHeading = document.getElementById('rest-heading'); // Heading shown above the rest list after during a search
 const searchInput = document.getElementById('search-input'); // The search bar element
-const searchButton = document.getElementById('search-button'); // Button to trigger the search
+//const searchButton = document.getElementById('search-button'); // Button to trigger the search
 const filterButtons = document.querySelectorAll('#filter-buttons button'); // Status filter buttons
 const sortButtons = document.querySelectorAll('#sort-buttons button'); // Sort buttons
 
@@ -71,13 +71,13 @@ function toDateTimeInputValue(date) {
 
 
 // View mode for a single task
-function renderViewMode(task) {
+function renderViewMode(task, keyword = '') {
     return `
         <div class="task-top-row">
-            <h3>${task.title}</h3>
+            <h3>${highlight(task.title, keyword)}</h3>
             <p>${task.status} / ${task.priority}</p>
         </div>
-        <p class="task-description" onclick="this.classList.toggle('expanded')">${task.description || ''}</p>
+        <p class="task-description" onclick="this.classList.toggle('expanded')">${highlight(task.description || '', keyword)}</p>
         <p>Due: ${formatDate(task.dueDate)}</p>
         <div class="task-buttons">
             <button class="btn-complete" onclick="markComplete(${task.id})">Complete</button>
@@ -109,7 +109,7 @@ function renderEditMode(task) {
 
 
 // Task rendering helper function:
-function renderList(container, tasks) {
+function renderList(container, tasks, keyword) {
     // container - Represents an element (e.g. An element that will hold the list of tasks, depends on my frontend design)
     // tasks - An array of task objects
     container.innerHTML = ''; // Clears container
@@ -123,9 +123,38 @@ function renderList(container, tasks) {
         const taskDiv = document.createElement('div');
         taskDiv.classList.add('task');
         taskDiv.id = `task-${task.id}`; // Assigns each task card an id, used by toggleEdit
-        taskDiv.innerHTML = renderViewMode(task);
+        taskDiv.innerHTML = renderViewMode(task, keyword);
         container.appendChild(taskDiv);
     });
+}
+
+
+
+// Search term highlighting
+function highlight(text, keyword) {
+    if (!keyword) return text;
+    const regex = new RegExp(keyword, 'gi'); // g - all matches, i - case-insensitive
+    return text.replace(regex, match => `<mark>${match}</mark>`); // Uses html mark tags
+}
+
+
+
+// Adds toggle functionality to task creation section
+function toggleAddTask() {
+    const form = document.getElementById('add-task-form');
+    const arrow = document.getElementById('add-task-arrow');
+    form.classList.toggle('collapsed'); // adds/removes the class that hides it
+    arrow.textContent = form.classList.contains('collapsed') ? '▲' : '▼'; // Ternary to flip the arrow direction when toggled
+}
+
+
+
+// Toggle control section
+function toggleControls() {
+    const body = document.getElementById('controls-body');
+    const arrow = document.getElementById('controls-arrow');
+    body.classList.toggle('collapsed');
+    arrow.textContent = body.classList.contains('collapsed') ? '▼' : '▲';
 }
 
 
@@ -220,8 +249,18 @@ sortButtons.forEach(button => { // Loops through buttons
 
 
 
-// Search:
-searchButton.addEventListener('click', async () => {
+// Live search:
+let searchTimeout; // Stores timer
+
+searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimeout); // Cancels the previous search
+    searchTimeout = setTimeout(runSearch, 400); // Waits 400ms after last keystroke then runs search
+});
+
+
+
+// Search
+async function runSearch() {
     const keyword = searchInput.value.trim(); // Trimmed search value assigned to a constant
     if (!keyword) { // Display tasks if no search
         loadTasks();
@@ -229,10 +268,12 @@ searchButton.addEventListener('click', async () => {
     }
     const [matchesResponse, allResponse] = await Promise.all([
         fetch(`/api/tasks/search?keyword=${encodeURIComponent(keyword)}`),
-        fetch('/api/tasks')]);
+        fetch('/api/tasks')
+    ]);
     // Each fetch call starts a network request and returns a Promise
     // Promise.all() - Takes an array of promises, in this case the above fetch calls, starts them simultaneously
     // [matchesResponse, allResponse] - Two variables which will be assigned to the fetched arrays
+    // encodeURIComponent(keyword) - UTF-8 encodes using escape characters
 
     const matches = await matchesResponse.json();
     const allTasks = await allResponse.json();
@@ -243,11 +284,9 @@ searchButton.addEventListener('click', async () => {
     matchesHeading.style.display = 'block';
     restHeading.style.display = 'block';
 
-    renderList(matchesList, matches);
-    renderList(restList, rest);
-});
-
-
+    renderList(matchesList, matches, keyword);
+    renderList(restList, rest, keyword);
+}
 
 
 
@@ -425,4 +464,37 @@ window.addEventListener('DOMContentLoaded', loadTasks);
 //            matchesList.appendChild(taskDiv);
 //        });
 //    });
+//});
+
+
+
+
+
+
+// Search:
+//searchInput.addEventListener('click', async () => {
+//    const keyword = searchInput.value.trim(); // Trimmed search value assigned to a constant
+//    if (!keyword) { // Display tasks if no search
+//        loadTasks();
+//        return;
+//    }
+//    const [matchesResponse, allResponse] = await Promise.all([
+//        fetch(`/api/tasks/search?keyword=${encodeURIComponent(keyword)}`),
+//        fetch('/api/tasks')]);
+//    // Each fetch call starts a network request and returns a Promise
+//    // Promise.all() - Takes an array of promises, in this case the above fetch calls, starts them simultaneously
+//    // [matchesResponse, allResponse] - Two variables which will be assigned to the fetched arrays
+//    // encodeURIComponent(keyword) - UTF-8 encodes using escape characters
+//
+//    const matches = await matchesResponse.json();
+//    const allTasks = await allResponse.json();
+//
+//    const matchIds = new Set(matches.map(task => task.id));
+//    const rest = allTasks.filter(task => !matchIds.has(task.id));
+//
+//    matchesHeading.style.display = 'block';
+//    restHeading.style.display = 'block';
+//
+//    renderList(matchesList, matches, keyword);
+//    renderList(restList, rest, keyword);
 //});

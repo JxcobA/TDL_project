@@ -22,7 +22,6 @@ public class Task {
     private Long id;
 
     @NotBlank
-    // Eventually could make it so blank task cards are automatically deleted
     private String title;
 
     // All fields in an entity are automatically marked as columns, this is here to override the default parameters
