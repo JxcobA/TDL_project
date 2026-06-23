@@ -1,13 +1,13 @@
 // Element constants:
-const addTaskForm = document.getElementById('add-task-form');
-const matchesList = document.getElementById('task-list-matches');
-const restList = document.getElementById('task-list-rest');
-const matchesHeading = document.getElementById('matches-heading');
-const restHeading = document.getElementById('rest-heading');
-const searchInput = document.getElementById('search-input');
-const searchButton = document.getElementById('search-button');
-const filterButtons = document.querySelectorAll('#filter-buttons button');
-const sortButtons = document.querySelectorAll('#sort-buttons button');
+const addTaskForm = document.getElementById('add-task-form'); // Form element for adding a new task
+const matchesList = document.getElementById('task-list-matches'); // Container for tasks matching the current search
+const restList = document.getElementById('task-list-rest'); // Container for non-matching tasks
+const matchesHeading = document.getElementById('matches-heading'); // The heading shown above the search match list during a search
+const restHeading = document.getElementById('rest-heading'); // Heading shown above the rest list after during a search
+const searchInput = document.getElementById('search-input'); // The search bar element
+const searchButton = document.getElementById('search-button'); // Button to trigger the search
+const filterButtons = document.querySelectorAll('#filter-buttons button'); // Status filter buttons
+const sortButtons = document.querySelectorAll('#sort-buttons button'); // Sort buttons
 
 
 
@@ -30,18 +30,21 @@ addTaskForm.addEventListener('submit', async (event) => {
     };
 
     // Response constant - stores the Response object
-    const response = await fetch('/api/tasks', { // awaits a promise until a Response object is resolved
+    const response = await fetch('/api/tasks', { // Awaits a promise until a Response object is resolved
         method: 'POST', // Sets HTTP method to POST
         headers: { 'Content-Type': 'application/json' }, // Tells the server the body is JSON - needed by @RequestBody to deserialise, otherwise treated as plain text
-        body: JSON.stringify(newTask) // converts object into JSON string
+        body: JSON.stringify(newTask) // Converts object into JSON string
     });
 
     if (response.ok) {
-        addTaskForm.reset(); // clears the form fields
+        addTaskForm.reset(); // Clears the form fields
+        document.getElementById('error-message').style.display = 'none'; // Clears any old error
         loadTasks(); // Call loadTasks() after after creating a new task
     } else {
-        console.error('Failed to create task');
+        const errorData = await response.json();
+        showError(errorData.message || 'Failed to create task. Check your input.');
     }
+    // TODO: Update GlobalExceptionHandler with MethodArgumentNotValidException and whatever else has happened
 });
 
 
@@ -56,7 +59,56 @@ filterButtons.forEach(button => { // Loops through buttons
 });
 
 
-// Helper function:
+
+// Helper to convert a date into the exact format datetime local inputs need
+function toDateTimeInputValue(date) {
+    if (!date) return ''; // No date, return empty
+    const d = new Date(date); // Date object constant
+    const pad = n => String(n).padStart(2, '0'); // .padStart() - Ensures single digits get a leading zero as required by input format
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+
+
+// View mode for a single task
+function renderViewMode(task) {
+    return `
+        <div class="task-top-row">
+            <h3>${task.title}</h3>
+            <p>${task.status} / ${task.priority}</p>
+        </div>
+        <p class="task-description" onclick="this.classList.toggle('expanded')">${task.description || ''}</p>
+        <p>Due: ${formatDate(task.dueDate)}</p>
+        <div class="task-buttons">
+            <button class="btn-complete" onclick="markComplete(${task.id})">Complete</button>
+            <button class="btn-ongoing" onclick="markOngoing(${task.id})">Ongoing</button>
+            <button class="btn-suspend" onclick="markSuspended(${task.id})">Suspend</button>
+            <button class="btn-delete" onclick="confirmDelete(${task.id})">Delete</button>
+            <button class="btn-edit" onclick="toggleEdit(${task.id})">Edit</button>
+        </div>
+    `;
+}
+
+
+
+// Edit mode for a single task
+function renderEditMode(task) {
+    return `
+        <div class="task-top-row">
+            <input type="text" id="edit-title-${task.id}" value="${task.title}">
+        </div>
+        <textarea id="edit-description-${task.id}">${task.description || ''}</textarea>
+        <input type="datetime-local" id="edit-dueDate-${task.id}" value="${toDateTimeInputValue(task.dueDate)}">
+        <div class="task-buttons">
+            <button class="btn-save" onclick="saveEdit(${task.id})">Save</button>
+            <button class="btn-cancel" onclick="toggleEdit(${task.id})">Cancel</button>
+        </div>
+    `;
+}
+
+
+
+// Task rendering helper function:
 function renderList(container, tasks) {
     // container - Represents an element (e.g. An element that will hold the list of tasks, depends on my frontend design)
     // tasks - An array of task objects
@@ -66,28 +118,65 @@ function renderList(container, tasks) {
         return;
     }
 
-    // NOTE: Add something that clears existing content before re-rendering, tasks are being duplicated
-
-
-    tasks.forEach(task => {
-        const taskDiv = document.createElement('div'); // Creates a taskDiv element
-        taskDiv.classList.add('task'); // Assign taskDiv the class 'task'
-        // Sets the content of taskDiv
-        taskDiv.innerHTML = `
-            <h3>${task.title}</h3>
-            <p>${task.description || ''}</p>
-            <p>Status: ${task.status}</p>
-            <p>Priority: ${task.priority}</p>
-            <p>Due: ${formatDate(task.dueDate)}</p>
-            <div class="task-buttons">
-                <button class="btn-complete" onclick="markComplete(${task.id})">Complete</button>
-                <button class="btn-ongoing" onclick="markOngoing(${task.id})">Ongoing</button>
-                <button class="btn-suspend" onclick="markSuspended(${task.id})">Suspend</button>
-                <button class="btn-delete" onclick="confirmDelete(${task.id})">Delete</button>
-            </div>
-        `;
-        container.appendChild(taskDiv); // Append taskDiv to container
+    tasks.forEach(task => { // Loops through tasks
+        taskCache[task.id] = task; // Remembers this task's data for edit mode
+        const taskDiv = document.createElement('div');
+        taskDiv.classList.add('task');
+        taskDiv.id = `task-${task.id}`; // Assigns each task card an id, used by toggleEdit
+        taskDiv.innerHTML = renderViewMode(task);
+        container.appendChild(taskDiv);
     });
+}
+
+
+
+// Stores task data in memory so I can switch between edit and view without another fetch
+let taskCache = {};
+
+// Toggle edit mode function
+function toggleEdit(id) {
+    const taskDiv = document.getElementById(`task-${id}`);
+    const task = taskCache[id];
+
+    // If currently showing inputs, classList.contains tells us which mode we're in
+    if (taskDiv.dataset.editing === 'true') {
+        taskDiv.innerHTML = renderViewMode(task);
+        taskDiv.dataset.editing = 'false';
+    } else {
+        taskDiv.innerHTML = renderEditMode(task);
+        taskDiv.dataset.editing = 'true';
+    }
+}
+
+// Sends edited fields to the backend, then exits edit mode
+async function saveEdit(id) {
+    const updated = {
+        title: document.getElementById(`edit-title-${id}`).value,
+        description: document.getElementById(`edit-description-${id}`).value,
+        dueDate: document.getElementById(`edit-dueDate-${id}`).value
+    };
+
+    const response = await fetch(`/api/tasks/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated)
+    });
+
+    if (response.ok) {
+        loadTasks(); // refreshes the whole list, exits edit mode automatically
+    } else {
+        const errorData = await response.json();
+        showError(errorData.message || 'Failed to update task.');
+    }
+}
+
+
+
+// Error message helper function:
+function showError(message) {
+    const errorPopup = document.getElementById('error-message'); // Assigns errorPopup to the error-message element
+    errorPopup.textContent = message; // Sets content of errorPopup to the error message
+    errorPopup.style.display = 'block';  // Makes errorPopup visible (was blank previously)
 }
 
 
@@ -160,14 +249,9 @@ searchButton.addEventListener('click', async () => {
 
 
 
-// Confirm task deletion:
-function confirmDelete(id) {
-    if (confirm('Delete this task?')) {
-        deleteTask(id);
-    }
-}
 
-// Delete tasks: (This may be redundant/fully covered in the backend)
+
+// Delete tasks: (This may be redundant)
 async function deleteTask(id) {
     try {
         const response = await fetch(`/api/tasks/${id}`, {
@@ -185,6 +269,36 @@ async function deleteTask(id) {
         console.error('Network error:', err);
     }
 }
+
+
+
+// Confirm task deletion:
+const deletePopup = document.getElementById('delete-popup'); // Delete popup element
+const confirmDeleteBtn = document.getElementById('confirm-delete-btn'); // Confirmation button
+const cancelDeleteBtn = document.getElementById('cancel-delete-btn'); // Cancel deletion button
+
+let pendingDeleteId = null; // Stores which task is awaiting confirmation
+
+// Opens the popup and remembers which task it is for
+function confirmDelete(id) {
+    pendingDeleteId = id;
+    deletePopup.style.display = 'flex';
+}
+// Confirm deletion button:
+confirmDeleteBtn.addEventListener('click', () => { // Delete confirmation button click handler
+    if (pendingDeleteId !== null) { // Null check
+        deleteTask(pendingDeleteId); // Deletes task
+    }
+    deletePopup.style.display = 'none'; // Hides confirmation popup
+    pendingDeleteId = null; // Clears memory of which task is being deleted
+});
+
+// Cancel deletion button:
+cancelDeleteBtn.addEventListener('click', () => { // Clock handler
+    deletePopup.style.display = 'none'; // Hides delete popup
+    pendingDeleteId = null; // Clears memory of which task is being deleted
+});
+
 
 
 // Status update functions:
@@ -240,6 +354,44 @@ window.addEventListener('DOMContentLoaded', loadTasks);
 
 
 // OLD CODE:
+
+// Task rendering helper function:
+//function renderList(container, tasks) {
+//    // container - Represents an element (e.g. An element that will hold the list of tasks, depends on my frontend design)
+//    // tasks - An array of task objects
+//    container.innerHTML = ''; // Clears container
+//    if (tasks.length === 0) { // If no tasks
+//        container.innerHTML = '<p>No tasks</p>'; // Set element content to this
+//        return;
+//    }
+//
+//    // NOTE: Add something that clears existing content before re-rendering, tasks are being duplicated
+//
+//
+//    tasks.forEach(task => {
+//        const taskDiv = document.createElement('div'); // Creates a taskDiv element
+//        taskDiv.classList.add('task'); // Assign taskDiv the class 'task'
+//        // Sets the content of taskDiv
+//        taskDiv.innerHTML = `
+//            <div class="task-top-row">
+//                <h3>${task.title}</h3>
+//                <p>${task.status} / ${task.priority}</p>
+//            </div>
+//            <p>${task.description || ''}</p>
+//            <p>Due: ${formatDate(task.dueDate)}</p>
+//            <div class="task-buttons">
+//                <button class="btn-complete" onclick="markComplete(${task.id})">Complete</button>
+//                <button class="btn-ongoing" onclick="markOngoing(${task.id})">Ongoing</button>
+//                <button class="btn-suspend" onclick="markSuspended(${task.id})">Suspend</button>
+//                <button class="btn-delete" onclick="confirmDelete(${task.id})">Delete</button>
+//                <button class="btn-edit" onclick="toggleEdit(${task.id})">Edit</button>
+//            </div>
+//        `;
+//        container.appendChild(taskDiv); // Append taskDiv to container
+//    });
+//}
+
+
 
 // This has been partially replaced with a helper function
 // Sorting:

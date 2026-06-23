@@ -5,16 +5,33 @@ body {
     padding: 20px;
 }
 
-h1, h2 {
+h1 {
+    text-align: left;
+    margin: 0 0 20px 0;
+}
+
+h2 {
     text-align: center;
     margin-bottom: 20px;
 }
 
-#add-task-section,
-#search-section,
+#add-task-section {
+        background: #ffffff;
+        border-radius: 10px;
+        padding: 16px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+}
+
 #controls-section {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     max-width: 800px;
-    margin: 0 auto 20px auto;
+    margin: 20px auto 20px auto;
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
@@ -54,13 +71,44 @@ h1, h2 {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     display: flex;
     flex-direction: column;
+    margin: 10px 0 10px 0;
     gap: 10px;
+}
+
+.task-top-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
 }
 
 .task h3 {
     margin: 0;
     font-size: 18px;
+    overflow: hidden;
     word-break: break-word;
+}
+
+.task-description {
+    max-height: 80px;
+    min-height: 40px;
+    overflow: hidden;
+    position: relative;
+    mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+    cursor: pointer;
+}
+
+.task-description.expanded {
+    max-height: 200px;
+    overflow-y: auto;
+    mask-image: none;
+    -webkit-mask-image: none;
+}
+
+#add-task-form textarea,
+.task textarea {
+    min-height: 200px;
+    resize: vertical;
 }
 
 .task p {
@@ -68,24 +116,28 @@ h1, h2 {
     font-size: 14px;
     color: #444;
     word-break: break-word;
+    white-space: pre-wrap;
+
 }
 
 .task-buttons {
     display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 10px;
+    flex-direction: row;
+    gap: 4px;
+    margin-top: auto;
 }
 
 .task button {
-    padding: 8px;
-    font-size: 14px;
+    flex: 1;
+    padding: 4px;
+    font-size: 12px;
     border: none;
-    border-radius: 6px;
+    border-radius: 4px;
     cursor: pointer;
-    color: #fff;
+    /* color: #fff; */
 }
 
+/*
 .btn-complete {
     background: #4CAF50;
 }
@@ -101,7 +153,28 @@ h1, h2 {
 .btn-delete {
     background: #f44336;
 }
+*/
 
 .task button:hover {
     opacity: 0.9;
+}
+
+/* Delete confirmation popup: */
+#delete-popup {
+    align-items: center;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    left: 0;
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
+
+#delete-popup-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
 }
