@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>TDL App</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <h1>To-Do List</h1>
+</header>
+
+
+<section id="add-task-section">
+    <div id="add-task-header" onclick="toggleAddTask()">
+        <span>Add Task</span>
+        <span id="add-task-arrow">▼</span>
+    </div>
+    <form id="add-task-form" class="task">
+        <div class="task-top-row">
+            <input type="text" id="title" placeholder="Title">
+            <select id="priority">
+                <option value="LOW">Low</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="HIGH">High</option>
+                <option value="URGENT">Urgent</option>
+            </select>
+        </div>
+        <textarea id="description" placeholder="Description (optional)"></textarea>
+        <input type="datetime-local" id="dueDate">
+        <button type="submit">Add Task</button>
+    </form>
+</section>
+
+<!--Search bar-->
+<input type="text" id="search-input" placeholder="Search tasks...">
+
+<!--Controls section containing search and filtering elements-->
+    <section id="controls-section">
+        <div id="controls-header" onclick="toggleControls()">
+            <span>Controls</span>
+            <span id="controls-arrow">▼</span>
+        </div>
+        <div id="controls-body" class="collapsed">
+            <div class="control-group" id="filter-buttons">
+                <button data-status="ALL">All</button>
+                <button data-status="ONGOING">Pending</button>
+                <button data-status="COMPLETED">Completed</button>
+                <button data-status="SUSPENDED">Suspended</button>
+            </div>
+            <div class="control-group" id="sort-buttons">
+                <button data-sort="dueDate">Sort by Due Date</button>
+                <button data-sort="priority">Sort by Priority</button>
+                <button data-sort="status">Sort by Status</button>
+            </div>
+        </div>
+    </section>
+
+<!--Error message-->
+<p id="error-message" style="display:none; color:red;"></p>
+
+<!--Delete confirmation popup-->
+<div id="delete-popup" style="display:none;">
+    <div id="delete-popup-content">
+        <p>Are you sure you want to delete this task?</p>
+        <button id="confirm-delete-btn">Delete</button>
+        <button id="cancel-delete-btn">Cancel</button>
+    </div>
+</div>
+
+<!-- Task list - populated dynamically by JS, not hardcoded here -->
+<section id="task-list-section">
+    <h2 id="matches-heading" style="display:none;">Matching Tasks</h2>
+    <div id="task-list-matches"></div>
+
+    <h2 id="rest-heading" style="display:none;">Other Tasks</h2>
+    <div id="task-list-rest"></div>
+</section>
+
+<!-- JS -->
+<script src="app.js"></script>
+</body>
+</html>
